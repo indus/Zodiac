@@ -3,7 +3,6 @@ particle background inspired by [jnicol/particleground](https://github.com/jnico
 
 **Demo** [zodiac.js.org](http://zodiac.js.org/)
 
-
 ``` js
 new Zodiac(
             'zodiac',                          // HTMLCanvasElement or id
