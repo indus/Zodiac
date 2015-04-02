@@ -69,7 +69,7 @@
                linkWidth: 2
             });
 
-         var gui = new dat.GUI();
+         var gui = new dat.GUI().close();
          gui.addColor(zodiac.options, 'dotColor');
          gui.addColor(zodiac.options, 'linkColor').onChange(function (value) { zodiac._ctx.strokeStyle = value; });
          gui.addColor(zodiac.options, 'backgroundColor');
