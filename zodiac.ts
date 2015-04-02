@@ -2,7 +2,7 @@
  * Zodiac
  *
  * @author Stefan Keim (indus)
- * @version 0.1.0
+ * @version 0.1.1
  * @description canvas based particle background
  *
  * Inspired by https://github.com/jnicol/particleground
@@ -11,18 +11,32 @@
 "use static"
 
 class Zodiac {
+    _ctx: CanvasRenderingContext2D
+    _: {
+        z: number
+        x: number
+        y: number
+        vx: number
+        vy: number
+        dx: number
+        dy: number
+    }[];
+    _refresh: () => void
     options: any = {
-        direction: [0, 0],
-        velocity: [[.1, 0.3], [.1, .3]],
-        bounce: [true, true],
-        parallax: .2,
-        density: 5000,
-        proximity: 50,
-        //backgroundColor: 'rgba(20,20,20,.2)',
-        //dotColor: '#aaa',
-        dotRadius: [1,5],
-        lineColor: '#aaa',
-        lineWidth: 1,
+        directionX: -1,                     // -1:left;0:random;1:right
+        directionY: -1,                     // -1:up;0:random;1:down
+        velocityX: [.1, .2],                // [minX,maxX]
+        velocityY: [.5, 1],                 // [minY,maxY]
+        bounceX: true,                      // bounce at left and right edge
+        bounceY: false,                     // bounce at top and bottom edge
+        parallax: .2,                       // float [0-1...]; 0: no paralax
+        density: 6000,                      // px^2 per node
+        dotRadius: [1, 5],                  // px value or [minR,maxR]
+        //backgroundColor: 'rgba(9,9,9,1)',   // default transparent; use alpha value for motion blur and ghosting
+        //dotColor: 'rgba(99,99,99,.5)',
+        linkColor: 'rgba(99,99,99,.8)',
+        linkDistance: 50,
+        linkWidth: 2
     };
 
     constructor(canvas: any, options: any = {}) {
@@ -35,15 +49,11 @@ class Zodiac {
         for (var key in options) { this.options[key] = options[key]; }
         options = this.options;
 
-        var ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }),
-            particles = [],
-            tilt = [0, 0],
-            radius = [].concat(options.dotRadius),
-            parallax = options.parallax/2 / (radius[1] ? (radius[1] - radius[0]) : radius[0]);
+        var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }),
+            tilt = [0, 0], radius, parallax, _, w, h;
 
-        var update = function () {
-            var w = canvas.width,
-                h = canvas.height;
+
+        var update = () => {
 
             if (options.backgroundColor) {
                 ctx.fillStyle = options.backgroundColor;
@@ -55,48 +65,48 @@ class Zodiac {
 
             ctx.beginPath();
 
-            for (var i = 0, p, x, y; i < particles.length; i++) {
-                p = particles[i];
+            for (var i = 0, p, x, y; i < _.length; i++) {
+                p = _[i];
 
                 /* MOVE */
-                p[1] += p[3];
-                p[2] += p[4];
+                p.x += p.vx;
+                p.y += p.vy;
 
                 /* POSITION */
                 if (options.parallax) {
-                    var fac = p[0] * parallax;
-                    p[5] += (tilt[0] * fac - p[5]) / 10;
-                    p[6] += (tilt[1] * fac - p[6]) / 10;
+                    var fac = p.z * parallax;
+                    p.dx += (tilt[0] * fac - p.dx) / 10;
+                    p.dy += (tilt[1] * fac - p.dy) / 10;
                 }
 
-                x = p[1] + p[5];
-                y = p[2] + p[6];
+                x = p.x + p.dx;
+                y = p.y + p.dy;
 
                 if (x < 0 || x > w)
-                    (options.direction[0]) ? (p[1] = ((x + w) % w) - p[5]) : (p[3] = -p[3]);
+                    (options.bounceX) ? (p.vx = -p.vx) : (p.x = ((x + w) % w) - p.dx);
 
                 if (y < 0 || y > h)
-                    (options.direction[1]) ? (p[2] = ((y + h) % h) - p[6]) : (p[4] = -p[4]);
+                    (options.bounceY) ? (p.vy = -p.vy) : (p.y = ((y + h) % h) - p.dy);
 
-                var r = radius[1] ? p[0] : radius[0];
+                var r = radius[1] ? p.z : radius;
                 /* DRAW */
                 ctx.moveTo(x + r, y);
                 ctx.arc(x, y, r, 0, Math.PI * 2);
 
                 // loop back no double connections
                 for (var j = i - 1; j >= 0; j--) {
-                    var q = particles[j],
-                        dx = q[1] - p[1],
-                        dy = q[2] - p[2],
+                    var q = _[j],
+                        dx = q.x - p.x,
+                        dy = q.y - p.y,
                         dist = Math.sqrt((dx * dx) + (dy * dy));
 
-                    if (dist < options.proximity) {
-                        var x = p[1] + p[5],
-                            y = p[2] + p[6],
-                            x2 = q[1] + q[5],
-                            y2 = q[2] + q[6],
+                    if (dist < options.linkDistance) {
+                        var x = p.x + p.dx,
+                            y = p.y + p.dy,
+                            x2 = q.x + q.dx,
+                            y2 = q.y + q.dy,
                             a = Math.atan2(y2 - y, x2 - x),
-                            r2 = radius[1] ? q[0] : radius[0],
+                            r2 = radius[1] ? q.z : radius,
                             cos = Math.cos(a),
                             sin = Math.sin(a);
 
@@ -117,49 +127,58 @@ class Zodiac {
         }
 
 
-        var onMousemove = function (ev?: MouseEvent) {
+        function onMousemove(ev?: MouseEvent) {
             tilt[0] = ev.pageX - window.innerWidth / 2;
             tilt[1] = ev.pageY - window.innerHeight / 2;
         }
 
-        var onOrientation = function (ev?: any) {
+        function onOrientation(ev?: any) {
             tilt[0] = Math.min(Math.max(-ev.beta, -30), 30) * (window.innerWidth / 30);
             tilt[1] = Math.min(Math.max(-ev.gamma, -30), 30) * (window.innerHeight / 30);
 
         }
 
-        var onResize = function () {
+        var onResize = this._refresh = () => {
+            _ = this._ = this._ || [];
 
-            var w = canvas.width = canvas.offsetWidth,
-                h = canvas.height = canvas.offsetHeight,
-                v = options.velocity,
-                d = options.direction,
+            radius = [].concat(options.dotRadius);
+            if (radius[0] == radius[1]) radius = radius[0];
+            parallax = options.parallax / (radius[1] ? Math.max(radius[0], radius[1]) * radius[0] : 5);
+            console.log(parallax);
+            w = canvas.width = canvas.offsetWidth;
+            h = canvas.height = canvas.offsetHeight;
+
+            var vx = options.velocityX,
+                vy = options.velocityY,
                 random = Math.random;
 
             var num = Math.ceil((w * h) / options.density);
 
-            for (var i = particles.length - 1; i >= 0; i--)
-                if (particles[i][1] > w || particles[i][2] > h)
-                    particles.splice(i, 1);
+            for (var i = _.length - 1; i >= 0; i--)
+                if (_[i].x > w || _[i].y > h)
+                    _.splice(i, 1);
 
-            if (num < particles.length)
-                particles.splice(num);
+            if (num < _.length)
+                _.splice(num);
 
-            while (num > particles.length)
-                particles.push([
-                    Math.ceil(radius[1] ? (random() * (radius[1] - radius[0]) + radius[0]) : random() * radius[0]), //z
-                    Math.ceil(random() * w), //x
-                    Math.ceil(random() * h), //y
-                    //  (random)direction * clamped random velocity
-                    (d[0] || ((random() > .5) ? 1 : -1)) * (random() * (v[0][1] - v[0][0]) + v[0][0]), //vx
-                    (d[1] || ((random() > .5) ? 1 : -1)) * (random() * (v[1][1] - v[1][0]) + v[1][0]), //vy
-                    0, 0 // offset
-                ]);
+            while (num > _.length)
+                _.push({
+                    // position
+                    z: Math.ceil(radius[1] ? (random() * (radius[1] - radius[0]) + radius[0]) : random() * 5), //z
+                    x: Math.ceil(random() * w),
+                    y: Math.ceil(random() * h),
+                    //  velocity: (random)direction * clamped random velocity
+                    vx: (options.directionX || ((random() > .5) ? 1 : -1)) * (random() * (vx[1] - vx[0]) + vx[0]),
+                    vy: (options.directionY || ((random() > .5) ? 1 : -1)) * (random() * (vy[1] - vy[0]) + vy[0]),
+                    // offset
+                    dx: 0,
+                    dy: 0
+                });
 
 
-            ctx.strokeStyle = options.lineColor;
+            ctx.strokeStyle = options.linkColor;
+            ctx.lineWidth = options.linkWidth;
             ctx.fillStyle = options.dotColor;
-            ctx.lineWidth = options.lineWidth;
         }
 
         window.addEventListener('resize', onResize, false);

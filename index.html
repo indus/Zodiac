@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   <title>Zodiac</title>
+   <title>Zodiac | 0.1.1</title>
    <style>
       html, body {
          width: 100%;
@@ -29,24 +29,83 @@
 
       document.addEventListener('DOMContentLoaded', function () {
 
+         console.log("%c Zodiac [0.1.1] ", "color:#42b983;background-color:#333;font-weight:bold;font-size:20px;", zodiac);
          var zodiac = new Zodiac(
             'zodiac',                          // HTMLCanvasElement or id
             {
-               direction: [0, -1],             // [dirX (-1:left,0:random,1:right),dirX (-1:up,0:random,1:down)]
-               velocity: [[.1, .2], [.5, 1]],  // [[minX,maxX],[minY,maxY]]
-               bounce: [false, true],          //[topBottom,leftRight]
-               parallax: .2,                   // float [0-1...]; 0: no paralax
-               density: 6000,                  // px^2 per node
-               proximity: 50,                  // px link distance
-               dotRadius: [1, 5],              // px value or [minR,maxR]
-               //dotColor: '#aaa',
-               lineColor: '#666',
-               lineWidth: 2,
-               //backgroundColor: 'rgba(20,20,20,.3)', // default transparent; use alpha value for motion blur and ghosting
+               directionX: 0,                     // -1:left;0:random;1:right
+               directionY: -1,                     // -1:up;0:random;1:down
+               velocityX: [.1, .2],                // [minX,maxX]
+               velocityY: [.5, 1],                 // [minY,maxY]
+               bounceX: true,                      // bounce at left and right edge
+               bounceY: false,                     // bounce at top and bottom edge
+               parallax: .2,                       // float [0-1...]; 0: no paralax
+               density: 6000,                      // px^2 per node
+               dotRadius: [1, 5],                  // px value or [minR,maxR]
+               backgroundColor: 'rgba(9,9,9,1)',   // default transparent; use alpha value for motion blur and ghosting
+               dotColor: 'rgba(99,99,99,.5)',
+               linkColor: 'rgba(99,99,99,.8)',
+               linkDistance: 50,
+               linkWidth: 2
             });
 
+         var gui = new dat.GUI();
+         gui.addColor(zodiac.options, 'dotColor');
+         gui.addColor(zodiac.options, 'linkColor').onChange(function (value) { zodiac._ctx.strokeStyle = value; });
+         gui.addColor(zodiac.options, 'backgroundColor');
+         gui.add(zodiac.options, 'linkWidth', .5, 5).onChange(function (value) { zodiac._ctx.lineWidth = value; });
+         gui.add(zodiac.options, 'linkDistance', 0, 1000);
+         gui.add(zodiac.options, 'directionX', -1, 1).step(1).onFinishChange(function (value) { console.log(value); zodiac._ = null; zodiac._refresh(); });
+         gui.add(zodiac.options, 'directionY', -1, 1).step(1).onFinishChange(function (value) { console.log(value); zodiac._ = null; zodiac._refresh(); });
+         gui.add(zodiac.options, 'density', 2000, 50000).onFinishChange(function (value) { zodiac._ = null; zodiac._refresh(); });
+         gui.add(zodiac.options, 'parallax', 0, 1).onFinishChange(function (value) { zodiac._refresh(); });
 
-         console.log("%c Zodiac [0.1.0] ", "color:#42b983;background-color:#333;font-weight:bold;font-size:20px;", zodiac);
+         var proxy = {
+            radiusMin: zodiac.options.dotRadius[0],
+            radiusMax: zodiac.options.dotRadius[1],
+            velocityXMin: zodiac.options.velocityX[0],
+            velocityXMax: zodiac.options.velocityX[1],
+            velocityYMin: zodiac.options.velocityY[0],
+            velocityYMax: zodiac.options.velocityY[1]
+         };
+
+         gui.add(proxy, 'radiusMin', 1, 10).onFinishChange(function (value) {
+
+            zodiac.options.dotRadius[0] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
+         gui.add(proxy, 'radiusMax', 1, 10).onFinishChange(function (value) {
+
+            zodiac.options.dotRadius[1] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
+
+         gui.add(proxy, 'velocityXMin', 0,2).onFinishChange(function (value) {
+
+            zodiac.options.velocityX[0] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
+         gui.add(proxy, 'velocityXMax', 0, 2).onFinishChange(function (value) {
+
+            zodiac.options.velocityX[1] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
+         gui.add(proxy, 'velocityYMin', 0, 2).onFinishChange(function (value) {
+
+            zodiac.options.velocityY[0] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
+         gui.add(proxy, 'velocityYMax', 0, 2).onFinishChange(function (value) {
+
+            zodiac.options.velocityY[1] = value;
+            zodiac._ = null;
+            zodiac._refresh();
+         });
 
       }, false);
 
