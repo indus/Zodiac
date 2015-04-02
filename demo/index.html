@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   <title>Zodiac</title>
+   <title>Zodiac | 0.1.1</title>
    <style>
       html, body {
          width: 100%;
@@ -30,18 +30,21 @@
 
          var zodiac = new Zodiac(
             'zodiac',                          // HTMLCanvasElement or id
-            {                 
-               direction: [0, -1],             // [dirX (-1:left,0:random,1:right),dirX (-1:up,0:random,1:down)]
-               velocity: [[.1, .2], [.5, 1]],  // [[minX,maxX],[minY,maxY]]
-               bounce: [false, true],          //[topBottom,leftRight]
-               parallax: .2,                   // float [0-1...]; 0: no paralax
-               density: 6000,                  // px^2 per node
-               proximity: 50,                  // px link distance
-               dotRadius: [1, 5],              // px value or [minR,maxR]
-               //dotColor: '#aaa',
-               lineColor: '#666',
-               lineWidth: 2,
-               //backgroundColor: 'rgba(20,20,20,.3)', // default transparent; use alpha value for motion blur and ghosting
+            {
+               directionX: 0,                     // -1:left;0:random;1:right
+               directionY: -1,                     // -1:up;0:random;1:down
+               velocityX: [.1, .2],                // [minX,maxX]
+               velocityY: [.5, 1],                 // [minY,maxY]
+               bounceX: true,                      // bounce at left and right edge
+               bounceY: false,                     // bounce at top and bottom edge
+               parallax: .2,                       // float [0-1...]; 0: no paralax
+               density: 6000,                      // px^2 per node
+               dotRadius: [1, 5],                  // px value or [minR,maxR]
+               backgroundColor: 'rgba(9,9,9,1)',   // default transparent; use alpha value for motion blur and ghosting
+               dotColor: 'rgba(99,99,99,.5)',
+               linkColor: 'rgba(99,99,99,.8)',
+               linkDistance: 50,
+               linkWidth: 2
             });
 
 
