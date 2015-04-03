@@ -83,8 +83,7 @@ var Zodiac = (function () {
                         ctx.lineTo(x2, y2);
                     }
                 }
-            }
-            ;
+            };
             ctx.stroke();
             options.dotColor && ctx.fill();
             requestAnimationFrame(update);
