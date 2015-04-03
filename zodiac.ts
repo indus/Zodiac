@@ -39,6 +39,7 @@ class Zodiac {
         bounceX: true,                      // bounce at left and right edge
         bounceY: false,                     // bounce at top and bottom edge
         parallax: .2,                       // float [0-1...]; 0: no paralax
+        pivot: 0,                           // float [0-1...]; 0: no paralax
         density: 6000,                      // px^2 per node
         dotRadius: [1, 5],                  // px value or [minR,maxR]
         //backgroundColor: 'rgba(9,9,9,1)',   // default transparent; use alpha value for motion blur and ghosting
@@ -59,7 +60,7 @@ class Zodiac {
         options = this.options;
 
         var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }),
-            tilt = [0, 0], radius, parallax, _, w, h;
+            tilt = [0, 0], _, w, h;
 
 
         var update = () => {
@@ -83,7 +84,7 @@ class Zodiac {
 
                 /* POSITION */
                 if (options.parallax) {
-                    var fac = p.z * parallax;
+                    var fac = p.z * options.parallax;
                     p.dx += (tilt[0] * fac - p.dx) / 10;
                     p.dy += (tilt[1] * fac - p.dy) / 10;
                 }
@@ -97,10 +98,10 @@ class Zodiac {
                 if (y < 0 || y > h)
                     (options.bounceY) ? (p.vy = -p.vy) : (p.y = ((y + h) % h) - p.dy);
 
-                var r = radius[1] ? p.z : radius;
+
                 /* DRAW */
-                ctx.moveTo(x + r, y);
-                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.moveTo(x + p.r, y);
+                ctx.arc(x, y, p.r, 0, Math.PI * 2);
 
                 // loop back no double connections
                 for (var j = i - 1; j >= 0; j--) {
@@ -115,14 +116,13 @@ class Zodiac {
                             x2 = q.x + q.dx,
                             y2 = q.y + q.dy,
                             a = Math.atan2(y2 - y, x2 - x),
-                            r2 = radius[1] ? q.z : radius,
                             cos = Math.cos(a),
                             sin = Math.sin(a);
 
-                        x += r * cos;
-                        y += r * sin;
-                        x2 -= r2 * cos;
-                        y2 -= r2 * sin;
+                        x += p.r * cos;
+                        y += p.r * sin;
+                        x2 -= q.r * cos;
+                        y2 -= q.r * sin;
 
                         ctx.moveTo(x, y);
                         ctx.lineTo(x2, y2);
@@ -150,9 +150,8 @@ class Zodiac {
         var onResize = this._refresh = () => {
             _ = this._ = this._ || [];
 
-            radius = [].concat(options.dotRadius);
+            var radius = [].concat(options.dotRadius);
             if (radius[0] == radius[1]) radius = radius[0];
-            parallax = options.parallax / (radius[1] ? Math.max(radius[0], radius[1]) * radius[0] : 5);
             w = canvas.width = canvas.offsetWidth;
             h = canvas.height = canvas.offsetHeight;
 
@@ -169,10 +168,12 @@ class Zodiac {
             if (num < _.length)
                 _.splice(num);
 
-            while (num > _.length)
+            while (num > _.length) {
+                var r = random();
                 _.push({
                     // position
-                    z: Math.ceil(radius[1] ? (random() * (radius[1] - radius[0]) + radius[0]) : random() * 5), //z
+                    z: (r -options.pivot)/4, //z
+                    r: radius[1] ? (r * (radius[1] - radius[0]) + radius[0]) : radius[0],
                     x: Math.ceil(random() * w),
                     y: Math.ceil(random() * h),
                     //  velocity: (random)direction * clamped random velocity
@@ -182,6 +183,7 @@ class Zodiac {
                     dx: 0,
                     dy: 0
                 });
+            }
 
 
             ctx.strokeStyle = options.linkColor;
@@ -210,8 +212,9 @@ class Zodiac {
         window.requestAnimationFrame = function (callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function () { callback(currTime + timeToCall); },
-                timeToCall);
+            var id = window.setTimeout(function () { callback(currTime + timeToCall); }, üiurseqalö
+
+^!                timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
