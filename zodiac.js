@@ -24,6 +24,7 @@ var Zodiac = (function () {
             bounceX: true,
             bounceY: false,
             parallax: .2,
+            pivot: 0,
             density: 6000,
             dotRadius: [1, 5],
             //backgroundColor: 'rgba(9,9,9,1)',   // default transparent; use alpha value for motion blur and ghosting
@@ -39,7 +40,7 @@ var Zodiac = (function () {
             this.options[key] = options[key];
         }
         options = this.options;
-        var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }), tilt = [0, 0], radius, parallax, _, w, h;
+        var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }), tilt = [0, 0], _, w, h;
         var update = function () {
             if (options.backgroundColor) {
                 ctx.fillStyle = options.backgroundColor;
@@ -57,7 +58,7 @@ var Zodiac = (function () {
                 p.y += p.vy;
                 /* POSITION */
                 if (options.parallax) {
-                    var fac = p.z * parallax;
+                    var fac = p.z * options.parallax;
                     p.dx += (tilt[0] * fac - p.dx) / 10;
                     p.dy += (tilt[1] * fac - p.dy) / 10;
                 }
@@ -67,18 +68,17 @@ var Zodiac = (function () {
                     (options.bounceX) ? (p.vx = -p.vx) : (p.x = ((x + w) % w) - p.dx);
                 if (y < 0 || y > h)
                     (options.bounceY) ? (p.vy = -p.vy) : (p.y = ((y + h) % h) - p.dy);
-                var r = radius[1] ? p.z : radius;
                 /* DRAW */
-                ctx.moveTo(x + r, y);
-                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.moveTo(x + p.r, y);
+                ctx.arc(x, y, p.r, 0, Math.PI * 2);
                 for (var j = i - 1; j >= 0; j--) {
                     var q = _[j], dx = q.x - p.x, dy = q.y - p.y, dist = Math.sqrt((dx * dx) + (dy * dy));
                     if (dist < options.linkDistance) {
-                        var x = p.x + p.dx, y = p.y + p.dy, x2 = q.x + q.dx, y2 = q.y + q.dy, a = Math.atan2(y2 - y, x2 - x), r2 = radius[1] ? q.z : radius, cos = Math.cos(a), sin = Math.sin(a);
-                        x += r * cos;
-                        y += r * sin;
-                        x2 -= r2 * cos;
-                        y2 -= r2 * sin;
+                        var x = p.x + p.dx, y = p.y + p.dy, x2 = q.x + q.dx, y2 = q.y + q.dy, a = Math.atan2(y2 - y, x2 - x), cos = Math.cos(a), sin = Math.sin(a);
+                        x += p.r * cos;
+                        y += p.r * sin;
+                        x2 -= q.r * cos;
+                        y2 -= q.r * sin;
                         ctx.moveTo(x, y);
                         ctx.lineTo(x2, y2);
                     }
@@ -99,10 +99,9 @@ var Zodiac = (function () {
         }
         var onResize = this._refresh = function () {
             _ = _this._ = _this._ || [];
-            radius = [].concat(options.dotRadius);
+            var radius = [].concat(options.dotRadius);
             if (radius[0] == radius[1])
                 radius = radius[0];
-            parallax = options.parallax / (radius[1] ? Math.max(radius[0], radius[1]) * radius[0] : 5);
             w = canvas.width = canvas.offsetWidth;
             h = canvas.height = canvas.offsetHeight;
             var vx = options.velocityX, vy = options.velocityY, random = Math.random;
@@ -112,10 +111,12 @@ var Zodiac = (function () {
                     _.splice(i, 1);
             if (num < _.length)
                 _.splice(num);
-            while (num > _.length)
+            while (num > _.length) {
+                var r = random();
                 _.push({
                     // position
-                    z: Math.ceil(radius[1] ? (random() * (radius[1] - radius[0]) + radius[0]) : random() * 5),
+                    z: (r - options.pivot) / 4,
+                    r: radius[1] ? (r * (radius[1] - radius[0]) + radius[0]) : radius[0],
                     x: Math.ceil(random() * w),
                     y: Math.ceil(random() * h),
                     //  velocity: (random)direction * clamped random velocity
@@ -125,6 +126,7 @@ var Zodiac = (function () {
                     dx: 0,
                     dy: 0
                 });
+            }
             ctx.strokeStyle = options.linkColor;
             ctx.lineWidth = options.linkWidth;
             ctx.fillStyle = options.dotColor;
@@ -150,7 +152,7 @@ var Zodiac = (function () {
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
             var id = window.setTimeout(function () {
                 callback(currTime + timeToCall);
-            }, timeToCall);
+            }, üiurseqalö ^ !timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
