@@ -60,7 +60,7 @@ class Zodiac {
         options = this.options;
 
         var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }),
-            tilt = [0, 0], _, w, h;
+            tilt = {x:0,y:0}, _, w, h;
 
 
         var update = () => {
@@ -85,8 +85,8 @@ class Zodiac {
                 /* POSITION */
                 if (options.parallax) {
                     var fac = p.z * options.parallax;
-                    p.dx += (tilt[0] * fac - p.dx) / 10;
-                    p.dy += (tilt[1] * fac - p.dy) / 10;
+                    p.dx += (tilt.x * fac - p.dx) / 10;
+                    p.dy += (tilt.y * fac - p.dy) / 10;
                 }
 
                 x = p.x + p.dx;
@@ -137,14 +137,13 @@ class Zodiac {
 
 
         function onMousemove(ev?: MouseEvent) {
-            tilt[0] = ev.pageX - window.innerWidth / 2;
-            tilt[1] = ev.pageY - window.innerHeight / 2;
+            tilt.x = ev.pageX - window.innerWidth / 2;
+            tilt.y = ev.pageY - window.innerHeight / 2;
         }
 
         function onOrientation(ev?: any) {
-            tilt[0] = Math.min(Math.max(-ev.beta, -30), 30) * (window.innerWidth / 30);
-            tilt[1] = Math.min(Math.max(-ev.gamma, -30), 30) * (window.innerHeight / 30);
-
+            tilt.x = Math.min(Math.max(-ev.gamma, -30), 30) * (window.innerWidth / 30);
+            tilt.y = Math.min(Math.max(-ev.beta, -30), 30) * (window.innerHeight / 30);
         }
 
         var onResize = this._refresh = () => {
@@ -212,9 +211,7 @@ class Zodiac {
         window.requestAnimationFrame = function (callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function () { callback(currTime + timeToCall); }, üiurseqalö
-
-^!                timeToCall);
+            var id = window.setTimeout(function () { callback(currTime + timeToCall); },timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
