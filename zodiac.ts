@@ -8,16 +8,14 @@
  * Inspired by https://github.com/jnicol/particleground
  */
 
-"use static"
-
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
  
 // requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
  
 // MIT license
- 
 
+"use static"
 
 class Zodiac {
     _ctx: CanvasRenderingContext2D
@@ -60,7 +58,7 @@ class Zodiac {
         options = this.options;
 
         var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }),
-            tilt = {x:0,y:0}, _, w, h;
+            tilt = { x: 0, y: 0 }, _, w, h;
 
 
         var update = () => {
@@ -171,7 +169,7 @@ class Zodiac {
                 var r = random();
                 _.push({
                     // position
-                    z: (r -options.pivot)/4, //z
+                    z: (r - options.pivot) / 4, //z
                     r: radius[1] ? (r * (radius[1] - radius[0]) + radius[0]) : radius[0],
                     x: Math.ceil(random() * w),
                     y: Math.ceil(random() * h),
@@ -211,7 +209,7 @@ class Zodiac {
         window.requestAnimationFrame = function (callback, element) {
             var currTime = new Date().getTime();
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-            var id = window.setTimeout(function () { callback(currTime + timeToCall); },timeToCall);
+            var id = window.setTimeout(function () { callback(currTime + timeToCall); }, timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
