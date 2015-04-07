@@ -7,11 +7,11 @@
  *
  * Inspired by https://github.com/jnicol/particleground
  */
-"use static";
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 // requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
 // MIT license
+"use static";
 var Zodiac = (function () {
     function Zodiac(canvas, options) {
         var _this = this;
@@ -40,7 +40,7 @@ var Zodiac = (function () {
             this.options[key] = options[key];
         }
         options = this.options;
-        var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }), tilt = [0, 0], _, w, h;
+        var ctx = this._ctx = canvas.getContext('2d', { alpha: !options.backgroundColor }), tilt = { x: 0, y: 0 }, _, w, h;
         var update = function () {
             if (options.backgroundColor) {
                 ctx.fillStyle = options.backgroundColor;
@@ -59,8 +59,8 @@ var Zodiac = (function () {
                 /* POSITION */
                 if (options.parallax) {
                     var fac = p.z * options.parallax;
-                    p.dx += (tilt[0] * fac - p.dx) / 10;
-                    p.dy += (tilt[1] * fac - p.dy) / 10;
+                    p.dx += (tilt.x * fac - p.dx) / 10;
+                    p.dy += (tilt.y * fac - p.dy) / 10;
                 }
                 x = p.x + p.dx;
                 y = p.y + p.dy;
@@ -83,18 +83,19 @@ var Zodiac = (function () {
                         ctx.lineTo(x2, y2);
                     }
                 }
-            };
+            }
+            ;
             ctx.stroke();
             options.dotColor && ctx.fill();
             requestAnimationFrame(update);
         };
         function onMousemove(ev) {
-            tilt[0] = ev.pageX - window.innerWidth / 2;
-            tilt[1] = ev.pageY - window.innerHeight / 2;
+            tilt.x = ev.pageX - window.innerWidth / 2;
+            tilt.y = ev.pageY - window.innerHeight / 2;
         }
         function onOrientation(ev) {
-            tilt[0] = Math.min(Math.max(-ev.beta, -30), 30) * (window.innerWidth / 30);
-            tilt[1] = Math.min(Math.max(-ev.gamma, -30), 30) * (window.innerHeight / 30);
+            tilt.x = Math.min(Math.max(-ev.gamma, -30), 30) * (window.innerWidth / 30);
+            tilt.y = Math.min(Math.max(-ev.beta, -30), 30) * (window.innerHeight / 30);
         }
         var onResize = this._refresh = function () {
             _ = _this._ = _this._ || [];
@@ -151,7 +152,7 @@ var Zodiac = (function () {
             var timeToCall = Math.max(0, 16 - (currTime - lastTime));
             var id = window.setTimeout(function () {
                 callback(currTime + timeToCall);
-            }, üiurseqalö ^ !timeToCall);
+            }, timeToCall);
             lastTime = currTime + timeToCall;
             return id;
         };
