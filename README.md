@@ -1,4 +1,5 @@
-﻿
+[![JS.ORG](https://img.shields.io/badge/js.org-zodiac-ffb400.svg?style=flat-square)](http://js.org)
+
 particle background inspired by [jnicol/particleground](https://github.com/jnicol/particleground)
 
 **Demo** [zodiac.js.org](http://zodiac.js.org/)
