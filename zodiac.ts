@@ -148,7 +148,9 @@ class Zodiac {
             _ = this._ = this._ || [];
 
             var radius = [].concat(options.dotRadius);
-            if (radius[0] == radius[1]) radius = radius[0];
+            if (radius.length == 1 || radius[0] == radius[1]) {
+                radius = radius[0]
+            };
             w = canvas.width = canvas.offsetWidth;
             h = canvas.height = canvas.offsetHeight;
 

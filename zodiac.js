@@ -100,8 +100,10 @@ var Zodiac = (function () {
         var onResize = this._refresh = function () {
             _ = _this._ = _this._ || [];
             var radius = [].concat(options.dotRadius);
-            if (radius[0] == radius[1])
+            if (radius.length == 1 || radius[0] == radius[1]) {
                 radius = radius[0];
+            }
+            ;
             w = canvas.width = canvas.offsetWidth;
             h = canvas.height = canvas.offsetHeight;
             var vx = options.velocityX, vy = options.velocityY, random = Math.random;
