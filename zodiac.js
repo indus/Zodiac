@@ -116,7 +116,7 @@ var Zodiac = (function () {
                 _.push({
                     // position
                     z: (r - options.pivot) / 4,
-                    r: radius[1] ? (r * (radius[1] - radius[0]) + radius[0]) : radius[0],
+                    r: radius[1] ? (r * (radius[1] - radius[0]) + radius[0]) : radius,
                     x: Math.ceil(random() * w),
                     y: Math.ceil(random() * h),
                     //  velocity: (random)direction * clamped random velocity
